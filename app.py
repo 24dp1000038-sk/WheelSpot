@@ -21,7 +21,9 @@ def start():
 app = start()
 
 from backend.create_data import *
-from backend.routes.auth import *   
+from backend.routes.authRoutes import *   
+from backend.routes.adminRoutes import *   
+from backend.routes.userRoutes import *   
 
 if __name__ == '__main__':
     app.run()
