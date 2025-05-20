@@ -20,10 +20,11 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String, unique= True, nullable = False)
     name = db.Column(db.String, nullable = False)
     password = db.Column(db.String, nullable = False)
+    address = db.Column(db.String)
+    pincode = db.Column(db.String)
     fs_uniquifier = db.Column(db.String, unique = True, nullable = False)
     active = db.Column(db.Boolean, nullable = False)
     roles = db.relationship('Role', backref = 'bearer', secondary= 'user_roles')
-    created_at = db.Column(db.DateTime, default = datetime.now)
     
 class ParkingLot(db.Model):
     __tablename__ = 'parking_lot'

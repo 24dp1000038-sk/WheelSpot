@@ -42,17 +42,18 @@ def login():
 def register():
     try:
         data = request.get_json()
-        if not data:
-            return jsonify({"message": "Error in data!"}), 400
-
-        required_fields = ['email', 'password', 'password2', 'name']
-        if not all(field in data for field in required_fields):
-            return jsonify({"message": "Missing required fields!"}), 400
-
         email = data['email']
         password = data['password']
         password2 = data['password2']
         name = data['name']
+        address = data['address']
+        pincode = data['pincode']
+        
+        if not data:
+            return jsonify({"message": "Error in data!"}), 400
+        
+        if not email or not password or not password2 or not name or not address or not pincode:
+            return jsonify({"message": "All fields are required"}), 400
 
         if password != password2:
             return jsonify({"message": "Passwords don't match"}), 400
@@ -63,15 +64,18 @@ def register():
         if app.security.datastore.find_user(email=email):
             return jsonify({"message": "Email already registered"}), 409
 
-        if all(field in data for field in ['phone', 'address']):
+        else:
             user = app.security.datastore.create_user(
                 email=email,
                 password=hash_password(password),
                 name=name,
+                address=address,
+                pincode=pincode,
                 roles=['user']
             )
             db.session.add(user)
-            db.session.flush() 
+            db.session.commit() 
+            return jsonify({"message" : "User is created"}), 201
 
     except Exception as e:
         return jsonify({"message": "Error in registration", "error": str(e)}), 500

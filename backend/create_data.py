@@ -13,6 +13,6 @@ with app.app_context():
         app.security.datastore.create_user(email = 'admin@gmail.com',name='admin', password = hash_password('hello@123'), roles = ['admin'])
         
     if not app.security.datastore.find_user(email= 'sam@gmail.com'):
-        app.security.datastore.create_user(email = 'sam@gmail.com',name='sam', password = hash_password('hello@123'), roles = ['user'])
+        app.security.datastore.create_user(email = 'sam@gmail.com',name='sam', password = hash_password('hello@123'), address="Patna", pincode="800001", roles = ['user'])
         
     db.session.commit()

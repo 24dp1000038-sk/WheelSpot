@@ -9,7 +9,7 @@ export default {
           <span class="fw-bold fs-4" style="letter-spacing: 0.5px;">WheelSpot</span>
         </router-link>
         <div class="ms-auto">
-          <router-link to="/login" class="btn btn-outline-light px-3 px-sm-4 rounded-pill">
+          <router-link to="/api/login" class="btn btn-outline-light px-3 px-sm-4 rounded-pill">
             <i class="bi bi-box-arrow-in-right me-1 me-sm-2"></i>
             <span class="d-none d-sm-inline">Login</span>
           </router-link>
@@ -86,7 +86,7 @@ export default {
                     ></textarea>
                   </div>
                   <div class="col-12">
-                    <label for="pincode" class="form-label">Pin Code:</label>
+                    <label for="pincode" class="form-label">Pin Code</label>
                     <input
                       id="pincode"
                       class="form-control"
@@ -96,11 +96,11 @@ export default {
                       pattern="[0-9]{6}"
                       title="Please enter a valid 6-digit pin code"
                       required
-                      v-model="formData.phone"
+                      v-model="formData.pincode"
                     >
                   </div>
                   <div class="col-12 mt-4 d-flex flex-column flex-sm-row justify-content-between gap-3">
-                    <router-link to="/login" class="btn btn-outline-primary flex-grow-1">Existing user?</router-link>
+                  <router-link to="/api/login" class="btn btn-outline-primary flex-grow-1">Existing user?</router-link>
                     <button 
                       type="submit" 
                       class="btn btn-outline-success flex-grow-1"
@@ -112,7 +112,6 @@ export default {
                         Processing...
                       </span>
                     </button>
-                    
                   </div>
                 </div>
               </form>
@@ -131,7 +130,7 @@ export default {
         password2: "",
         name: "",
         address: "",
-        phone: "",
+        pincode: "",
       },
       isLoading: false,
       errorMessage: ""
@@ -149,8 +148,8 @@ export default {
         return;
       }
 
-      if (!/^\d{10}$/.test(this.formData.phone)) {
-        this.errorMessage = "Please enter a valid 10-digit phone number";
+      if (!/^\d{6}$/.test(this.formData.pincode)) {
+        this.errorMessage = "Please enter a valid 6-digit pincode number";
         return;
       }
 
@@ -169,7 +168,7 @@ export default {
             password2: this.formData.password2,
             name: this.formData.name,
             address: this.formData.address,
-            phone: this.formData.phone
+            pincode: this.formData.pincode
           }),
         });
 
