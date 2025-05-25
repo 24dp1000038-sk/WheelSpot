@@ -3,7 +3,7 @@
 }
 
 .hero-section {
-  background: linear-gradient(135deg, #355798 0%, #6e8dc3 100%);
+  background: linear-gradient(135deg, #0e1a31 0%, #89ace9 100%);
   padding: 100px 0 60px;
 }
 .service-card {
@@ -15,7 +15,7 @@
 .service-icon {
   width: 70px;
   height: 70px;
-  background: rgba(13, 110, 253, 0.1);
+  background: rgba(49, 137, 145, 0.1);
 }
 .step-number {
   width: 50px;
@@ -33,5 +33,5 @@
 .social-links a {
   width: 40px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.179);
 }

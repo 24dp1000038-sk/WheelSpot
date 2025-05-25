@@ -2,7 +2,6 @@ export default {
   template: `
   <div class="container-fluid min-vh-100 bg-light d-flex flex-column">
     <link rel="stylesheet" href="../static/css/nav.css">
-    <link rel="stylesheet" href="../static/css/password.css">
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top shadow-sm py-2 nav-color">
       <div class="container">
         <router-link class="navbar-brand d-flex align-items-center" to="/">
@@ -51,11 +50,11 @@ export default {
                     required
                     v-model="formData.password"
                   >
-                  <button type="button" class="btn btn-link position-absolute end-0 top-50 btn-position translate-middle-y"@click="togglePass">
-                    <img :src="showPassword ? eyeOpen : eyeClose" class="toggle-img"  alt="Toggle password">
+                  <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y"@click="togglePass" :style="{ marginTop: '15px',
+                  marginRight: '10px'}">
+                  <i :class="showPassword ? ' bi-eye-fill' : 'bi bi-eye-slash-fill'"  :style="{ color: showPassword ? 'red' : 'black', fontSize: '28px'}"></i>
                   </button>
                 </div>
-                
                 <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-4">
                   <router-link to="/api/register" class="btn btn-outline-primary flex-grow-1">
                     Register
@@ -76,8 +75,6 @@ export default {
         email: "",
         password: "",
       },
-      eyeClose: "./static/image/eye-close.png",
-      eyeOpen: "./static/image/eye-open.png",
       showPassword: false
     };
   },
@@ -104,13 +101,14 @@ export default {
 
         switch(data.user_role) {
           case 'admin':
-            this.$router.push('/admin_dashboard');
+            this.$router.push('/api/adminHome');
             break;
           case 'user':
-            this.$router.push('/user_dashboard');
+            this.$router.push('/api/userHome');
             break;
           default:
-            this.$router.push('/');
+            this.$router.push('/api/notFound');
+            break;
         }
       } catch (error) { 
         console.error("Login error:", error);

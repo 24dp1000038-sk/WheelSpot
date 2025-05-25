@@ -133,7 +133,7 @@ export default {
         pincode: "",
       },
       isLoading: false,
-      errorMessage: ""
+      errorMessage: "",
     };
   },
   methods: {
@@ -168,7 +168,7 @@ export default {
             password2: this.formData.password2,
             name: this.formData.name,
             address: this.formData.address,
-            pincode: this.formData.pincode
+            pincode: this.formData.pincode,
           }),
         });
 
@@ -184,10 +184,10 @@ export default {
           localStorage.setItem("user_role", "user");
         }
 
-        this.$router.push("/user_dashboard");
-        
+        this.$router.push("/userHome");
       } catch (error) {
-        this.errorMessage = error.message || "Registration failed. Please try again.";
+        this.errorMessage =
+          error.message || "Registration failed. Please try again.";
         console.error("Registration error:", error);
       } finally {
         this.isLoading = false;

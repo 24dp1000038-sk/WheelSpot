@@ -16,6 +16,9 @@ export default {
             </div>
         </div>
       </nav>
+      <main>
+        <h2>User Home</h2>
+      </main>
     </div>               
 `,
 };

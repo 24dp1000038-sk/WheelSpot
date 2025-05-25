@@ -4,12 +4,12 @@ from  ..extensions import db
 from ..models import User, Role, ParkingLot, ParkingSpot, Bookings
 from datetime import datetime
 
-@app.route('/admin', methods=['GET'])
-@auth_required('token')
+@app.route('/api/adminHome', methods=['GET'])
+# @auth_required('token')
 @roles_required('admin')    
 def admin_home():
     try:
-        return jsonify("Admin login", current_user.email, current_user.password), 200
+        return jsonify({"message": "Admin login and this message is showing form the backend"}), 200
     except Exception as e:
         return jsonify({"message": "Problem in fetching users", "error": str(e)}), 500
     
