@@ -50,7 +50,7 @@ export default {
                     required
                     v-model="formData.password"
                   >
-                  <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y"@click="togglePass" :style="{ marginTop: '15px',
+                  <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y" @click="togglePass" :style="{ marginTop: '15px',
                   marginRight: '10px'}">
                   <i :class="showPassword ? ' bi-eye-fill' : 'bi bi-eye-slash-fill'"  :style="{ color: showPassword ? 'red' : 'black', fontSize: '28px'}"></i>
                   </button>

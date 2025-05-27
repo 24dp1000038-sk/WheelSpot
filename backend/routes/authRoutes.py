@@ -1,6 +1,7 @@
 from flask import current_app as app, jsonify, request, render_template
 from flask_security import login_user, hash_password, verify_password, auth_required, logout_user, roles_required, current_user
 from  ..extensions import db
+import re
 
 datastore = app.security.datastore
 
@@ -52,20 +53,23 @@ def register():
         if not data:
             return jsonify({"message": "Error in data!"}), 400
         
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            return jsonify({"message": "Enter a valid Email Id"}), 400
+        
         if not email or not password or not password2 or not name or not address or not pincode:
             return jsonify({"message": "All fields are required"}), 400
 
         if password != password2:
             return jsonify({"message": "Passwords don't match"}), 400
 
-        if len(password) <= 5:
+        if len(password) < 4:
             return jsonify({"message": "Password must be at least 5 characters"}), 400
-
+        
         if app.security.datastore.find_user(email=email):
             return jsonify({"message": "Email already registered"}), 409
 
         else:
-            user = app.security.datastore.create_user(
+            app.security.datastore.create_user(
                 email=email,
                 password=hash_password(password),
                 name=name,
@@ -73,9 +77,16 @@ def register():
                 pincode=pincode,
                 roles=['user']
             )
-            db.session.add(user)
             db.session.commit() 
-            return jsonify({"message" : "User is created"}), 201
+            
+            user = app.security.datastore.find_user(email=email)
+            
+            login_user(user)
+            
+            return jsonify({"message" : "User is created",
+                            "auth_token": user.get_auth_token(),
+                            "user_role": user.roles[0].name,
+                            }), 201
 
     except Exception as e:
         return jsonify({"message": "Error in registration", "error": str(e)}), 500
@@ -85,5 +96,3 @@ def register():
 def logout():
     logout_user()
     return jsonify({"message": "Logged out successfully"}), 200
-
-

@@ -30,6 +30,7 @@ export default {
         const data = await response.json();
 
         if (!response.ok) {
+          console.error("Admin home fetch error:", data.message);
           throw new Error(data.message || "Failed to load admin home");
         }
 

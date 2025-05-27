@@ -5,11 +5,10 @@ from ..models import User, Role, ParkingLot, ParkingSpot, Bookings
 from datetime import datetime
 
 @app.route('/api/adminHome', methods=['GET'])
-# @auth_required('token')
+@auth_required('token')
 @roles_required('admin')    
 def admin_home():
     try:
         return jsonify({"message": "Admin login and this message is showing form the backend"}), 200
     except Exception as e:
         return jsonify({"message": "Problem in fetching users", "error": str(e)}), 500
-    

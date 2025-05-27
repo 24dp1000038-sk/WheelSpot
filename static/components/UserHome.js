@@ -8,17 +8,50 @@ export default {
             <i class="bi bi-car-front-fill me-2 fs-4"></i>
             <span class="fw-bold fs-4" style="letter-spacing: 0.5px;">WheelSpot</span>
           </router-link>
-        <div class="ms-auto">
-            <router-link to="/login" class="btn btn-outline-light px-3 px-sm-4 rounded-pill">
-              <i class="bi bi-box-arrow-in-right me-1 me-sm-2"></i>
-              <span class="d-none d-sm-inline">Login</span>
-            </router-link>
-            </div>
+          <h4 class= "text-white">Welcome {{ name }}</h4>
         </div>
       </nav>
       <main>
-        <h2>User Home</h2>
+        <div>
+          <h2>User Home</h2>
+        </div>
       </main>
     </div>               
 `,
+  data() {
+    return {
+      name: localStorage.getItem("name") || "User",
+      message: '',
+      errorMessage: ''
+    };
+  },
+  methods: {
+    async fetchAdminHome() {
+      try {
+        const response = await fetch("/api/userHome", {
+          method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error("Admin home fetch error:", data.message);
+          throw new Error(data.message || "Failed to load admin home");
+        }
+
+        this.message = data.message;
+
+      } catch (error) {
+        console.error("Admin home fetch error:", error);
+        this.errorMessage = error.message || "Something went wrong.";
+      }
+    }
+  },
+  mounted() {
+    this.fetchAdminHome();
+  }
 };
+
