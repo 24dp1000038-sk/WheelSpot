@@ -1,6 +1,6 @@
 export default {
   template: `
-  <div class="container-fluid p-0">
+  <div class="container-fluid p-0 m-0">
     <link rel="stylesheet" href="../static/css/home.css">
     <link rel="stylesheet" href="../static/css/nav.css">
     <nav class="navbar navbar-expand-lg navbar-dark nav-sec fixed-top">
@@ -10,14 +10,14 @@ export default {
           <span class="fw-bold fs-4" style="letter-spacing: 0.5px;">WheelSpot</span>
         </router-link>
         <div class="ms-auto">
-          <router-link to="/api/login" class="btn btn-outline-light px-4 rounded-pill">
+          <router-link to="/login" class="btn btn-outline-light px-4 rounded-pill">
             <i class="bi bi-box-arrow-in-right me-2"></i>
             <span class="d-none d-sm-inline">Login</span>
           </router-link>
         </div>
       </div>
     </nav>
-
+  
     <header class="hero-section text-white text-center">
       <div class="container">
         <div class="row align-items-center">
@@ -25,7 +25,7 @@ export default {
             <h1 class="display-4 fw-bold mb-4">Find & Reserve Parking Easily</h1>
             <p class="lead mb-4">Secure, real-time parking solutions for your vehicle — anytime, anywhere.</p>
             <div class="d-flex justify-content-center align-items-center">
-              <router-link to="/api/register" class="btn btn-success btn-lg px-4">Get Started </router-link>
+              <router-link to="/register" class="btn btn-success btn-lg px-4">Get Started </router-link>
             </div>
           </div>
         </div>

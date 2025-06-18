@@ -1,5 +1,5 @@
 from flask import current_app as app, jsonify, request, render_template
-from flask_security import login_user, hash_password, verify_password, auth_required, logout_user, roles_required, current_user
+from flask_security import login_user, hash_password, verify_password, auth_required, logout_user
 from  ..extensions import db
 import re
 
@@ -14,7 +14,7 @@ def login():
     try:
         data = request.get_json()
         if not data:
-            return jsonify({"message": "No data provided"}), 400
+            return jsonify({"message": "No data"}), 400
         email = data.get('email')
         password = data.get('password')
         

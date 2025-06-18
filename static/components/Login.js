@@ -9,7 +9,7 @@ export default {
           <span class="fw-bold fs-4" style="letter-spacing: 0.5px;">WheelSpot</span>
         </router-link>
         <div class="ms-auto">
-          <router-link to="/api/register" class="btn btn-outline-light px-3 px-sm-4 rounded-pill">
+          <router-link to="/register" class="btn btn-outline-light px-3 px-sm-4 rounded-pill">
             <i class="bi bi-box-arrow-in-right me-1 me-sm-2"></i>
             <span class="d-none d-sm-inline">Register</span>
           </router-link>
@@ -56,7 +56,7 @@ export default {
                   </button>
                 </div>
                 <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-4">
-                  <router-link to="/api/register" class="btn btn-outline-primary flex-grow-1">
+                  <router-link to="/register" class="btn btn-outline-primary flex-grow-1">
                     Register
                   </router-link>
                   <button type="submit" class="btn btn-outline-success flex-grow-1">Login</button>
@@ -75,7 +75,8 @@ export default {
         email: "",
         password: "",
       },
-      showPassword: false
+      errorMessage: "",
+      showPassword: false,
     };
   },
   methods: {
@@ -101,13 +102,13 @@ export default {
 
         switch(data.user_role) {
           case 'admin':
-            this.$router.push('/api/adminHome');
+            this.$router.push('/adminHome');
             break;
           case 'user':
-            this.$router.push('/api/userHome');
+            this.$router.push('/userHome');
             break;
           default:
-            this.$router.push('/api/notFound');
+            this.$router.push('/notFound');
             break;
         }
       } catch (error) { 

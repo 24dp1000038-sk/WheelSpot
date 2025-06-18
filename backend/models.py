@@ -40,7 +40,6 @@ class ParkingSpot(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     lot_id = db.Column(db.Integer, db.ForeignKey('parking_lot.id'), nullable = False)
     status = db.Column(db.String(1), db.CheckConstraint("status IN ('A', 'O')"), default='A')
-    created_at = db.Column(db.DateTime, default = datetime.now)
 
 class Bookings(db.Model):
     __tablename__ = 'bookings'
@@ -51,4 +50,3 @@ class Bookings(db.Model):
     start_time = db.Column(db.DateTime, default = datetime.now)
     end_time = db.Column(db.DateTime)
     vehicle_number = db.Column(db.String, nullable = False)
-    

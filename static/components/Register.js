@@ -9,7 +9,7 @@ export default {
           <span class="fw-bold fs-4" style="letter-spacing: 0.5px;">WheelSpot</span>
         </router-link>
         <div class="ms-auto">
-          <router-link to="/api/login" class="btn btn-outline-light px-3 px-sm-4 rounded-pill">
+          <router-link to="/login" class="btn btn-outline-light px-3 px-sm-4 rounded-pill">
             <i class="bi bi-box-arrow-in-right me-1 me-sm-2"></i>
             <span class="d-none d-sm-inline">Login</span>
           </router-link>
@@ -100,7 +100,7 @@ export default {
                     >
                   </div>
                   <div class="col-12 mt-4 d-flex flex-column flex-sm-row justify-content-between gap-3">
-                  <router-link to="/api/login" class="btn btn-outline-primary flex-grow-1">Existing user?</router-link>
+                  <router-link to="/login" class="btn btn-outline-primary flex-grow-1">Existing user?</router-link>
                     <button 
                       type="submit" 
                       class="btn btn-outline-success flex-grow-1"
