@@ -3,8 +3,9 @@ from flask_security import auth_required, roles_required, current_user
 from ..extensions import db
 from ..models import ParkingLot, ParkingSpot, Bookings
 from datetime import datetime
+import random, re
 
-@app.route("/api/user/home", methods=['GET'])
+@app.route("/api/user/parking/lot/view", methods=['GET'])
 @auth_required('token')
 @roles_required('user')
 def user_home():
@@ -30,107 +31,120 @@ def user_home():
     except Exception as e:
         return jsonify({"message": "Problem fetching user info", "error": str(e)}), 500
 
-
-@app.route("/api/user/parkingLots", methods=["GET"])
-@auth_required('token')
-@roles_required('user')
-def get_parking_lots():
-    try:
-        lots = ParkingLot.query.all()
-        return jsonify([{
-            "id": lot.id,
-            "name": lot.name,
-            "location": lot.location,
-            "pincode": lot.pincode
-        } for lot in lots]), 200
-    except Exception as e:
-        return jsonify({"message": "Error fetching parking lots", "error": str(e)}), 500
-
-
-@app.route("/api/user/parkingSpots/<int:lot_id>", methods=["GET"])
-@auth_required('token')
-@roles_required('user')
-def get_parking_spots(lot_id):
-    try:
-        spots = ParkingSpot.query.filter_by(lot_id=lot_id, status='available').all()
-        return jsonify([{
-            "id": spot.id,
-            "spot_number": spot.spot_number,
-            "status": spot.status
-        } for spot in spots]), 200
-    except Exception as e:
-        return jsonify({"message": "Error fetching parking spots", "error": str(e)}), 500
-
-
-@app.route("/api/user/bookSpot", methods=["POST"])
+@app.route("/api/user/spot/book", methods=["POST"])
 @auth_required('token')
 @roles_required('user')
 def book_parking_spot():
     try:
         data = request.get_json()
-        spot_id = data.get("spot_id")
-        start_time = datetime.strptime(data.get("start_time"), "%Y-%m-%d %H:%M")
-        end_time = datetime.strptime(data.get("end_time"), "%Y-%m-%d %H:%M")
+        lot_id = data.get("lot_id")
+        vehicle_number = data.get("vehicle_number", "").upper().strip()
+        start_time = datetime.now()
 
-        spot = ParkingSpot.query.get(spot_id)
-        if not spot or spot.status != 'available':
-            return jsonify({"message": "Spot not available"}), 400
+        if not lot_id or not vehicle_number:
+            return jsonify({"message": "Lot ID and vehicle number are required"}), 400
 
-        # Create booking
+        vehicle_number_patter = r'^[A-Z]{2}[ ]?[0-9]{2}[ ]?[A-Z]{1,2}[ ]?[0-9]{4}$'
+        if not re.match(vehicle_number_patter, vehicle_number):
+            return jsonify({"message": "Invalid vehicle number format"}), 400
+
+        available_spots = ParkingSpot.query.filter_by(lot_id=lot_id, status='A').all()
+        if not available_spots:
+            return jsonify({"message": "No available spots in the selected lot"}), 400
+
+        selected_spot = random.choice(available_spots)
+
         booking = Bookings(
             user_id=current_user.id,
-            spot_id=spot_id,
-            start_time=start_time,
-            end_time=end_time,
-            status="booked"
+            lot_id=lot_id,
+            spot_id=selected_spot.id,
+            vehicle_number=vehicle_number,
+            start_time=start_time
         )
 
-        spot.status = "booked"
+        selected_spot.status = 'O'
 
         db.session.add(booking)
         db.session.commit()
 
-        return jsonify({"message": "Spot booked successfully"}), 201
+        return jsonify({
+            "message": "Parking spot booked successfully",
+            "booking_id": booking.id,
+            "spot_id": selected_spot.id,
+            "lot_id": lot_id,
+        }), 201
+
     except Exception as e:
-        return jsonify({"message": "Error booking spot", "error": str(e)}), 500
+        return jsonify({"message": "Error booking parking spot", "error": str(e)}), 500
 
-
-@app.route("/api/user/bookings", methods=["GET"])
+@app.route("/api/user/spot/release/preview/<int:spot_id>", methods=["GET"])
 @auth_required('token')
 @roles_required('user')
-def get_user_bookings():
+def preview_release_spot(spot_id):
     try:
-        bookings = Bookings.query.filter_by(user_id=current_user.id).all()
-        return jsonify([{
-            "id": b.id,
-            "spot_id": b.spot_id,
-            "start_time": b.start_time.strftime("%Y-%m-%d %H:%M"),
-            "end_time": b.end_time.strftime("%Y-%m-%d %H:%M"),
-            "status": b.status
-        } for b in bookings]), 200
+        booking = Bookings.query.filter_by(spot_id=spot_id, user_id=current_user.id, end_time=None).first()
+        if not booking:
+            return jsonify({"message": "No active booking found for this spot"}), 404
+
+        releasing_time = datetime.now()
+        parked_duration = (releasing_time - booking.start_time).total_seconds() / 3600
+        parked_hours = max(1, int(parked_duration)) 
+
+        lot = ParkingLot.query.get(booking.lot_id)
+        total_cost = round(parked_hours * lot.price, 2)
+
+        return jsonify({
+            "spot_id": booking.spot_id,
+            "vehicle_number": booking.vehicle_number,
+            "parking_time": booking.start_time.strftime("%Y-%m-%d %H:%M"),
+            "releasing_time": releasing_time.strftime("%Y-%m-%d %H:%M"),
+            "total_cost": total_cost,
+        }), 200
+
     except Exception as e:
-        return jsonify({"message": "Error fetching bookings", "error": str(e)}), 500
+        return jsonify({"message": "Error fetching preview", "error": str(e)}), 500
 
-
-@app.route("/api/cancelBooking/<int:booking_id>", methods=["DELETE"])
+@app.route("/api/user/spot/release", methods=["POST"])
 @auth_required('token')
 @roles_required('user')
-def cancel_booking(booking_id):
+def release_parking_spot():
     try:
-        booking = Bookings.query.get(booking_id)
-        if not booking or booking.user_id != current_user.id:
-            return jsonify({"message": "Unauthorized or booking not found"}), 404
+        data = request.get_json()
+        spot_id = data.get("spot_id")
 
-        spot = ParkingSpot.query.get(booking.spot_id)
-        if spot:
-            spot.status = "available"
+        if not spot_id:
+            return jsonify({"message": "spot_id is required"}), 400
 
-        db.session.delete(booking)
+        booking = Bookings.query.filter_by(user_id=current_user.id, spot_id=spot_id, end_time=None).first()
+
+        if not booking:
+            return jsonify({"message": "No active booking found for this spot"}), 404
+
+        end_time = datetime.now()
+        booking.end_time = end_time
+
+        parked_duration = (end_time - booking.start_time).total_seconds() / 3600
+        parked_hours = max(1, int(parked_duration)) 
+        lot = ParkingLot.query.get(booking.lot_id)
+        cost = round(parked_hours * lot.price, 2)
+
+        spot = ParkingSpot.query.get(spot_id)
+        spot.status = 'A'
+
         db.session.commit()
-        return jsonify({"message": "Booking canceled"}), 200
+
+        return jsonify({
+            "message": "Spot released successfully",
+            "spot_id": spot.id,
+            "vehicle_number": booking.vehicle_number,
+            "parking_time": booking.start_time.strftime("%Y-%m-%d %H:%M"),
+            "releasing_time": end_time.strftime("%Y-%m-%d %H:%M"),
+            "total_cost": cost
+        }), 200
+
     except Exception as e:
-        return jsonify({"message": "Error canceling booking", "error": str(e)}), 500
-    
+        return jsonify({"message": "Error releasing spot", "error": str(e)}), 500
+
 @app.route("/api/user/summary", methods=["GET"])
 @auth_required('token')
 @roles_required('user')

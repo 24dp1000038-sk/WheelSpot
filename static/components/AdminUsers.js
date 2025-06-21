@@ -35,8 +35,65 @@ export default {
           </div>
         </div>
       </nav>
-    <h3 class="mt-3">welcome to admin User info page</h3>
+    <div class="container mt-4">
+      <div class="container-fluid p-0 m-0" v-if="users.length > 0">
+      <h4 class="text-center border border-primary p-2 rounded">Registered Users</h4>
+      <table class="table table-bordered mt-4 text-center align-middle" >
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Full Name</th>
+            <th>Address</th>
+            <th>Pin Code</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="user in users" :key="user.id">
+            <td>{{ user.id }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.address }}</td>
+            <td>{{ user.pincode }}</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <div v-else class="text-center mt-4 text-muted fs-1">
+        No users found.
+      </div>
+    </div>
   </div>
   `,
-};
+  data() {
+    return {
+      users: [],
+    };
+  },
+  mounted() {
+    this.fetchUsers();
+  },
+  methods: {
+    async fetchUsers() {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("/api/admin/users", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
+        if (!response.ok) throw new Error("Failed to fetch users");
+
+        const data = await response.json();
+        this.users = data;
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    },
+    logout() {
+      localStorage.removeItem("token");
+      this.$router.push("/login");
+    },
+  },
+};
