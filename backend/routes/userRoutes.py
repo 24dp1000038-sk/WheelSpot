@@ -24,9 +24,8 @@ def user_home():
         
         return jsonify({
             "lots" : lots,
-            "email": user.email,
-            "pincode": user.pincode,
-            "message": "User login successful"
+            "user_id": user.id,
+            "message" :"Getting Parking lot info successfully"
         }), 200
     except Exception as e:
         return jsonify({"message": "Problem fetching user info", "error": str(e)}), 500
@@ -127,6 +126,8 @@ def release_parking_spot():
         parked_hours = max(1, int(parked_duration)) 
         lot = ParkingLot.query.get(booking.lot_id)
         cost = round(parked_hours * lot.price, 2)
+        
+        booking.bill_amount = cost
 
         spot = ParkingSpot.query.get(spot_id)
         spot.status = 'A'
@@ -144,6 +145,31 @@ def release_parking_spot():
 
     except Exception as e:
         return jsonify({"message": "Error releasing spot", "error": str(e)}), 500
+
+@app.route("/api/user/spot/history", methods=["GET"])
+@auth_required('token')
+@roles_required('user')
+def user_spot_history():
+    try:
+        user = current_user
+        bookings = Bookings.query.filter_by(user_id=user.id).all()
+
+        history = []
+        for booking in bookings:
+            spot = ParkingSpot.query.get(booking.spot_id)
+            lot = ParkingLot.query.get(booking.lot_id)
+            history.append({
+                "spot_id": spot.id,
+                "vehicle_number": booking.vehicle_number,
+                "parking_time": booking.start_time.strftime("%Y-%m-%d %H:%M"),
+                "releasing_time": booking.end_time.strftime("%Y-%m-%d %H:%M") if booking.end_time else None,
+                "total_cost": booking.bill_amount
+            })
+
+        return jsonify({"history": history}), 200
+
+    except Exception as e:
+        return jsonify({"message": "Error fetching spot history", "error": str(e)}), 500
 
 @app.route("/api/user/summary", methods=["GET"])
 @auth_required('token')

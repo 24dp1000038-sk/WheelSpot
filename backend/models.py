@@ -49,4 +49,5 @@ class Bookings(db.Model):
     spot_id = db.Column(db.Integer, db.ForeignKey('parking_spot.id'), nullable = False)
     start_time = db.Column(db.DateTime, default = datetime.now)
     end_time = db.Column(db.DateTime)
+    bill_amount = db.Column(db.Float, default = 0.0)
     vehicle_number = db.Column(db.String, nullable = False)
