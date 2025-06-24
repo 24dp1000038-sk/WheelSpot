@@ -76,23 +76,20 @@ export default {
   methods: {
     async fetchUsers() {
       try {
-        const token = localStorage.getItem("token");
         const response = await fetch("/api/admin/users", {
           headers: {
-            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            "Auth-Token": localStorage.getItem("auth_token")
           },
         });
-
-        if (!response.ok) throw new Error("Failed to fetch users");
-
         const data = await response.json();
         this.users = data;
-      } catch (error) {
-        console.error("Error fetching users:", error);
+      } catch (err) {
+        console.error("Error fetching users", err);
       }
     },
     logout() {
-      localStorage.removeItem("token");
+      localStorage.removeItem("auth_token");
       this.$router.push("/login");
     },
   },

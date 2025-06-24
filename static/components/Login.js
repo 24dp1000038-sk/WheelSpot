@@ -69,57 +69,61 @@ export default {
     </main>
   </div>
   `,
-  data() {
-    return {
-      formData: {
-        email: "",
-        password: "",
-      },
-      errorMessage: "",
-      showPassword: false,
-    };
-  },
-  methods: {
-    async loginUser() {
-      try {
-        const response = await fetch("/api/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(this.formData),
-        });
-    
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.message || 'Login failed');
-        }
-    
-        localStorage.setItem("auth_token", data.auth_token);
-        localStorage.setItem("user_id", data.user_id);
-        localStorage.setItem("user_role", data.user_role);
+  data: function() {
+  return {
+    formData:{
+      email: "",
+      password: ""
+    },
+    message: "",
+    showPassword: false,
+  }
+},
+methods:{
+  async loginUser() {
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          "Content-Type": 'application/json'
+        },
+        body: JSON.stringify(this.formData)
+      });
 
-        switch(data.user_role) {
-          case 'admin':
-            this.$router.push('/adminHome');
-            break;
-          case 'user':
-            this.$router.push('/userHome');
-            break;
-          default:
-            this.$router.push('/notFound');
-            break;
-        }
-      } catch (error) { 
-        console.error("Login error:", error);
-        this.errorMessage = error.message || "Login failed. Please try again.";
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed. Please try again.');
       }
-    },
-    togglePass() {
-      this.showPassword = !this.showPassword;
-      const passwordInput = document.getElementById("password");
-      passwordInput.type = this.showPassword ? "text" : "password";
-    },
+
+      localStorage.setItem("auth_token", data.auth_token);
+      localStorage.setItem("user_id", data.user_id);
+      localStorage.setItem("user_role", data.user_role);
+
+
+      this.$emit('login');
+
+      switch(data.user_role) {
+        case 'admin':
+          this.$router.push('/adminHome');
+          break;
+        case 'user':
+          this.$router.push('/userHome');
+          break;
+        default:
+          this.$router.push('/notFound');
+          break;
+      }
+
+    } catch (error) {
+      console.error("Login error:", error);
+      this.message = error.message;
+    }
+  },
+  togglePass() {
+    this.showPassword = !this.showPassword;
+    const passwordInput = document.getElementById("password");
+    passwordInput.type = this.showPassword ? "text" : "password";
+  },
   },
 };

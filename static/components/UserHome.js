@@ -1,7 +1,6 @@
 export default {
   template: `
     <div class="container-fluid p-0 m-0">
-      <!-- NavBar --->
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
           <p class="navbar-brand p-0 m-0">Parking User</p>
@@ -26,7 +25,7 @@ export default {
           </div>
         </div>
       </nav>
-      <!-- Recent Parking History -->
+      <!-- User Parking History and release option --->
       <div class="container mt-4">
       <div class="card mb-4">
         <div class="card-header bg-primary text-white">
@@ -39,26 +38,23 @@ export default {
                 <th>ID</th>
                 <th>Location</th>
                 <th>Vehicle No</th>
-                <th>Timestamp</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Total Cost</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>120</td>
-                <td>xxxxx</td>
-                <td>TN13B988</td>
-                <td>xx-xx-xx</td>
+                <td>{{spotId}}</td>
+                <td>{{location}}</td>
+                <td>{{vehicleNumber}}</td>
+                <td>{{startTime}}</td>
+                <td>{{endTime}}</td>
+                <td>{{totalCost}}</td>
                 <td>
                   <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#releaseModal">Release</button>
                 </td>
-              </tr>
-              <tr>
-                <td>142</td>
-                <td>xxxxx</td>
-                <td>AP31Q421</td>
-                <td>xx-xx-xx</td>
-                <td><button class="btn btn-secondary btn-sm">Parked Out</button></td>
               </tr>
             </tbody>
           </table>
@@ -186,4 +182,30 @@ export default {
     </div>
     </div>
   `,
+  data() {
+    return {
+      spotId: '',
+      lotId: '',
+      userId: '',
+      vehicleNumber: '',
+      releaseVehicleNumber: '',
+      parkingTime: '',
+      releasingTime: '',
+      totalCost: ''
+    };
+  },
+  methods: {
+    async bookParking() {
+      console.log('Booking parking spot:', this.spotId, this.lotId, this.userId, this.vehicleNumber);
+      this.$router.push('/userSummary');
+    },
+    async releaseParking() {
+      console.log('Releasing parking spot:', this.spotId, this.releaseVehicleNumber, this.parkingTime, this.releasingTime, this.totalCost);
+      this.$router.push('/userSummary');
+    },
+    async logout() {
+      console.log('User logged out');
+      this.$router.push('/login');
+    }
+  },
 };

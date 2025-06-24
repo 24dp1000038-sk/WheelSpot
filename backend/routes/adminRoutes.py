@@ -16,6 +16,11 @@ def view_parking_lots():
         "address": lot.address,
         "price": lot.price,
         "total_spots": lot.total_spots,
+        "occupied_spots": ParkingSpot.query.filter_by(lot_id=lot.id, status='O').count(),
+        "spots": [{
+            "id": spot.id,
+            "status": spot.status
+        } for spot in ParkingSpot.query.filter_by(lot_id=lot.id).all()]
     } for lot in lots]), 200
 
 #  ---- creating a parking lot ---
@@ -38,7 +43,7 @@ def create_parking_lot():
         lot_id = new_parking_lot.id
 
         no_of_spots = data['total_spots']
-        for i in range(no_of_spots):
+        for _ in range(no_of_spots):
             spot = ParkingSpot(lot_id=lot_id, status='A') 
             db.session.add(spot)
 
@@ -181,67 +186,66 @@ def get_all_users():
     except Exception as e:
         return jsonify({"message": "Error fetching users", "error": str(e)}), 500
 
-
-# ---- search using user id, parking lot id, location, pincode ---
 @app.route("/api/admin/search", methods=["GET"])
 @auth_required('token')
 @roles_required('admin')
 def admin_search():
-    search_by = request.args.get("search_by")
-    search_value = request.args.get("query")
+    search_type = request.args.get("type") 
+    search_query = request.args.get("query")
 
     try:
         results = []
 
-        if not search_by or not search_value:
+        if not search_type or not search_query:
             return jsonify({"message": "Search type and query required"}), 400
 
-        if search_by == "user_id":
-            bookings = Bookings.query.filter_by(user_id=int(search_value)).all()
-            results = [{
-                "booking_id": b.id,
-                "user_id": b.user_id,
-                "lot_id": b.lot_id,
-                "spot_id": b.spot_id,
-                "vehicle_number": b.vehicle_number,
-                "start_time": b.start_time,
-                "end_time": b.end_time
-            } for b in bookings]
+        if search_type == "user":
+            user = User.query.filter_by(id=int(search_query)).first()
+            if user:
+                results = [{
+                    "type": "user",
+                    "id": user.id,
+                    "name": user.name,
+                    "email": user.email,
+                    "pincode": user.pincode 
+                }]
 
-        elif search_by == "location":
-            lots = ParkingLot.query.filter(ParkingLot.location.ilike(f"%{search_value}%")).all()
-            results = []
+        elif search_type == "location":
+            lots = ParkingLot.query.filter(ParkingLot.address.ilike(f"%{search_query}%")).all()
             for lot in lots:
                 spots = ParkingSpot.query.filter_by(lot_id=lot.id).all()
-                occupied = sum(1 for s in spots if s.status == 'O')
-                available = sum(1 for s in spots if s.status == 'A')
+                occupied_count = sum(1 for s in spots if s.status == 'O')
+                capacity_count = len(spots) 
+
                 results.append({
+                    "type": "lot",     
                     "lot_id": lot.id,
-                    "location": lot.location,
                     "address": lot.address,
-                    "occupied": occupied,
-                    "available": available,
-                    "spots": [{"id": s.id, "status": s.status} for s in spots]
+                    "occupied": occupied_count,
+                    "capacity": capacity_count,
+                    "spots": [{"id": s.id, "is_occupied": s.status == 'O'} for s in spots]
                 })
 
-        elif search_by == "spot_id":
-            spot = ParkingSpot.query.get(int(search_value))
+        elif search_type == "spot":
+            spot = ParkingSpot.query.get(int(search_query))
             if spot:
-                results = {
-                    "spot_id": spot.id,
+                results = [{
+                    "type": "spot",          
+                    "id": spot.id,      
                     "lot_id": spot.lot_id,
-                    "status": spot.status
-                }
-            else:
-                return jsonify({"message": "Spot not found"}), 404
+                    "is_occupied": spot.status == 'O'
+                }]
 
         else:
-            return jsonify({"message": "Invalid search filter"}), 400
+            return jsonify({"message": "Invalid search type"}), 400
 
         return jsonify(results), 200
 
+    except ValueError:
+        return jsonify({"message": "Invalid ID format. Please provide a number."}), 400
     except Exception as e:
-        return jsonify({"message": "Error processing search", "error": str(e)}), 500
+        app.logger.error(f"Error during admin search: {e}") 
+        return jsonify({"message": "An error occurred while processing your request.", "error": str(e)}), 500
 
 #  ---- admin summary ------
 @app.route("/api/admin/summary", methods=["GET"])
