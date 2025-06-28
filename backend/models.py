@@ -25,6 +25,7 @@ class User(db.Model, UserMixin):
     fs_uniquifier = db.Column(db.String, unique = True, nullable = False)
     active = db.Column(db.Boolean, nullable = False)
     roles = db.relationship('Role', backref = 'bearer', secondary= 'user_roles')
+    bookings = db.relationship('Bookings', backref = 'bearer', lazy = True)
     
 class ParkingLot(db.Model):
     __tablename__ = 'parking_lot'

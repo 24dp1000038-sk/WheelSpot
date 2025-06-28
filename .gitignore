@@ -7,3 +7,5 @@ __pycache__
 file1.py
 file2.py
 test.html
+*.csv
+dump.rdb

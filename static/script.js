@@ -5,7 +5,6 @@ import AdminHome from "./components/AdminHome.js";
 import AdminSearch from "./components/AdminSearch.js";
 import AdminSummary from "./components/AdminSummary.js";
 import AdminUsers from "./components/AdminUsers.js";
-import NotFound from "./components/NotFound.js";
 import UserHome from "./components/UserHome.js";
 import UserSummary from "./components/UserSummary.js";
 
@@ -20,7 +19,6 @@ const routes = [
   { path: "/adminUsers", component: AdminUsers },
   { path: "/userHome", component: UserHome },
   { path: "/userSummary", component: UserSummary },
-  { path: "/notFound", component: NotFound },
 
 ];
 

@@ -39,10 +39,9 @@ def create_parking_lot():
         )
         db.session.add(new_parking_lot)
         db.session.commit()
-        
-        lot_id = new_parking_lot.id
 
-        no_of_spots = data['total_spots']
+        no_of_spots = new_parking_lot.total_spots
+        lot_id = new_parking_lot.id
         for _ in range(no_of_spots):
             spot = ParkingSpot(lot_id=lot_id, status='A') 
             db.session.add(spot)
@@ -253,17 +252,32 @@ def admin_search():
 @roles_required('admin')
 def admin_summary():
     try:
-        total_users = User.query.count()
-        total_parking_lots = ParkingLot.query.count()
-        total_bookings = Bookings.query.count()
+        lots = ParkingLot.query.all()
+        
+        total_bill_each_lot = []
+        for lot in lots:
+            bookings = Bookings.query.filter_by(lot_id=lot.id).all()
+            total_bill = sum(booking.bill_amount for booking in bookings)
+            total_bill_each_lot.append({
+                "lot_id": lot.id,
+                "total_amount": total_bill
+            })
 
-        summary = {
-            "total_users": total_users,
-            "total_parking_lots": total_parking_lots,
-            "total_bookings": total_bookings
-        }
+        parking_lots = []
+        for lot in lots:
+            available_spots = ParkingSpot.query.filter_by(lot_id=lot.id, status='A').count()
+            occupied_spots = lot.total_spots - available_spots
+            parking_lots.append({
+                "lot_id": lot.id,
+                "location": lot.location,
+                "available" : available_spots,
+                "occupied" : occupied_spots
+            })
 
-        return jsonify(summary), 200
+        return jsonify({
+            "bill": total_bill_each_lot,
+            "lots": parking_lots
+        }), 200
     except Exception as e:
         return jsonify({"message": "Error fetching summary", "error": str(e)}), 500
 

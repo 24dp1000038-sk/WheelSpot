@@ -3,7 +3,7 @@ export default {
   <div class="container-fluid p-0 m-0">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
-        <p class="navbar-brand p-0 m-0 text-warning">Welcome to Admin</p>
+        <p class="navbar-brand p-0 m-0 text-warning">Welcome Admin</p>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -15,7 +15,6 @@ export default {
             <li class="nav-item"><router-link class="nav-link" to="/adminSummary">Summary</router-link></li>
           </ul>
           <ul class="navbar-nav ms-auto me-5">
-            <li class="nav-item"><router-link class="nav-link" to="/adminProfile">Edit Profile</router-link></li>
             <li class="nav-item"><a class="nav-link text-danger" href="#" @click="logout">Logout</a></li>
           </ul>
         </div>
@@ -55,7 +54,7 @@ export default {
               </div>
 
               <div class="d-flex justify-content align-items-center">
-                <button class="btn btn-outline-warning me-2"data-bs-toggle="modal" data-bs-target="#updateLot" @click="updateLot(lot)">Edit</button>
+                <button class="btn btn-outline-warning me-2" data-bs-toggle="modal"data-bs-target="#updateLot"@click="openEditModal(lot)">Edit</button>
                 <button class="btn btn-outline-danger ms-2" @click="deleteLot(lot.id)">Delete</button>
               </div>
             </div>
@@ -113,26 +112,26 @@ export default {
               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-              <form @submit.prevent="updateLot(newLot)">
+              <form @submit.prevent="submitUpdateLot">
                 <div class="mb-3">
                   <label for="location" class="form-label">Location</label>
-                  <input type="text" class="form-control" id="location" v-model="newLot.location" value="{{ lot.location }}" required>
+                  <input type="text" class="form-control" id="location" v-model="updateLot.location" required>
                 </div>
                 <div class="mb-3">
                   <label for="address" class="form-label">Address</label>
-                  <input type="text" class="form-control" id="address" v-model="newLot.address" value="{{ lot.address }}" required>
+                  <input type="text" class="form-control" id="address" v-model="updateLot.address" required>
                 </div>
                 <div class="mb-3">
                   <label for="pincode" class="form-label">Pincode</label>
-                  <input type="text" class="form-control" id="pincode" v-model="newLot.pincode" value="{{ lot.pincode }}" required>
+                  <input type="text" class="form-control" id="pincode" v-model="updateLot.pincode" required>
                 </div>
                 <div class="mb-3">
                   <label for="price" class="form-label">Price per Hour</label>
-                  <input type="number" class="form-control" id="price" v-model="newLot.price" value="{{ lot.price }}" required>
+                  <input type="number" class="form-control" id="price" v-model="updateLot.price" required>
                 </div>
                 <div class="mb-3">
                   <label for="total_spots" class="form-label">Total Spots</label>
-                  <input type="number" class="form-control" id="total_spots" v-model="newLot.total_spots" value="{{ lot.total_spots }}" required>
+                  <input type="number" class="form-control" id="total_spots" v-model="updateLot.total_spots" required>
                 </div>
                 <div class="mb-3 d-flex justify-content-end">
                   <button type="button" class="btn btn-secondary me-3" data-bs-dismiss="modal">Cancel</button>
@@ -150,20 +149,20 @@ export default {
   data() {
     return {
       lots: [],
-      newLot: {
-      location: '',
-      address: '',
-      pincode: '',
-      price: null,
-      total_spots: null,
-    },
-    updateLot:{
-      location: '',
-      address: '',
-      pincode: '',
-      price: null,
-      total_spots: null,
-    },
+      newLot:{
+        location: '',
+        address: '',
+        pincode: '',
+        price: null,
+        total_spots: null,
+      },
+      updateLot:{
+        location: '',
+        address: '',
+        pincode: '',
+        price: null,
+        total_spots: null,
+      },
       message: '',
     };
   },
@@ -202,28 +201,36 @@ export default {
             total_spots: lotData.total_spots,
           }),
         });
+        await this.fetchLots();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addLotModal'));
+        modal.hide();
         if (!response.ok) {
           throw new Error("Failed to create lot");
-        }
-        this.fetchLots();
+        };
       } catch (err) {
         console.error("Error creating lot", err);
       }
     },
-    async updateLot(lotId, updatedData) {
-      try {
-        const response = await fetch(`/api/admin/lot/update/${lotId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Auth-Token": localStorage.getItem("auth_token")
-          },
-          body: JSON.stringify(updatedData),
-        });
-        if (!response.ok) {
-          throw new Error("Failed to update lot");
-        }
-        this.fetchLots();
+    openEditModal(lot) {
+    this.updateLot = { ...lot };
+    this.selectedLotId = lot.id;
+    },
+    async submitUpdateLot() {
+  try {
+    const response = await fetch(`/api/admin/lot/update/${this.selectedLotId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Auth-Token": localStorage.getItem("auth_token")
+      },
+        body: JSON.stringify(this.updateLot),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update lot");
+      }
+      await this.fetchLots(); 
+      const modal = bootstrap.Modal.getInstance(document.getElementById('updateLot'));
+      modal.hide();
       } catch (err) {
         console.error("Error updating lot", err);
       }

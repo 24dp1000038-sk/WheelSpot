@@ -3,38 +3,24 @@ export default {
   <div class="container-fluid p-0 m-0">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
-        <p class="navbar-brand p-0 m-0">Parking Admin</p>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar" aria-controls="adminNavbar" aria-expanded="false" aria-label="Toggle navigation">
+        <p class="navbar-brand p-0 m-0 text-warning">Welcome Admin</p>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
           <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse ms-5" id="adminNavbar">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <router-link class="nav-link" to="/adminHome">Home</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/adminUsers">Users</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/adminSearch">Search</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/adminSummary">Summary</router-link>
-            </li>
+            <li class="nav-item"><router-link class="nav-link" to="/adminHome">Home</router-link></li>
+            <li class="nav-item"><router-link class="nav-link" to="/adminUsers">Users</router-link></li>
+            <li class="nav-item"><router-link class="nav-link" to="/adminSearch">Search</router-link></li>
+            <li class="nav-item"><router-link class="nav-link" to="/adminSummary">Summary</router-link></li>
           </ul>
-          
           <ul class="navbar-nav ms-auto me-5">
-            <li class="nav-item">
-              <router-link class="nav-link" to="/adminHome">Edit Profile</router-link>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-danger" href="#" @click.prevent="logout">Logout</a>
-            </li>
+            <li class="nav-item"><a class="nav-link text-danger" href="#" @click="logout">Logout</a></li>
           </ul>
         </div>
       </div>
     </nav>
+    
     <div class="container mt-4">
 
     <div class="d-flex flex-column flex-lg-row mb-4">
@@ -49,10 +35,9 @@ export default {
       <button class="btn btn-primary" @click="performSearch">Search</button>
     </div>
 
-    <div v-if="results.length" class="mt-4">
+    <div v-if="results.length > 0" class="mt-4">
       <h5 class="text-primary">Search Results</h5>
-
-      <template v-for="result in results" :key="result.id || result.lot_id">
+      <div v-for="result in results" :key="result.id || result.lot_id">
         
         <div v-if="result.type === 'lot'" class="card my-3">
           <div class="card-header bg-info text-white d-flex justify-content-between">
@@ -83,7 +68,7 @@ export default {
           </div>
         </div>
 
-      </template>
+      </div>
     </div>
     
     <div v-else-if="searched" class="text-center mt-5">
@@ -118,14 +103,7 @@ export default {
   },
   methods: {
     performSearch() {
-      this.$router.replace({ query: { type: this.searchType, query: this.query } })
-        .catch(err => {
-          if (err.name !== 'NavigationDuplicated') {
-            console.error(err);
-          }
-        });
-      
-      this.fetchSearchResults();
+      this.$router.replace({ query: { type: this.searchType, query: this.query } });
     },
     async fetchSearchResults() {
       this.searched = true;
@@ -141,13 +119,8 @@ export default {
           },
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
         const data = await response.json();
         this.results = data;
-        console.log("Fetched search results:", this.results);
       } catch (err) {
         console.error("Error fetching search results:", err);
         this.results = [];

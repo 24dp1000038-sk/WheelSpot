@@ -156,16 +156,14 @@ def user_spot_history():
 
         history = []
         for booking in bookings:
-            spot = ParkingSpot.query.get(booking.spot_id)
-            lot = ParkingLot.query.get(booking.lot_id)
             history.append({
-                "spot_id": spot.id,
+                "booking_id": booking.id,
+                "location": ParkingLot.query.get(booking.lot_id).location,
                 "vehicle_number": booking.vehicle_number,
-                "parking_time": booking.start_time.strftime("%Y-%m-%d %H:%M"),
-                "releasing_time": booking.end_time.strftime("%Y-%m-%d %H:%M") if booking.end_time else None,
+                "start_time": booking.start_time.strftime("%Y-%m-%d %H:%M"),
+                "end_time": booking.end_time.strftime("%Y-%m-%d %H:%M") if booking.end_time else None,
                 "total_cost": booking.bill_amount
-            })
-
+            });
         return jsonify({"history": history}), 200
 
     except Exception as e:
@@ -176,17 +174,26 @@ def user_spot_history():
 @roles_required('user')
 def user_summary():
     try:
-        user = current_user
-        bookings = Bookings.query.filter_by(user_id=user.id).all()
-        total_bookings = len(bookings)
-        total_spots_booked = sum(1 for b in bookings if b.status == "booked")
+        user_id = current_user.id
+        bookings = Bookings.query.filter_by(user_id=user_id).all()
+        booking_data = []
+        total_amount = 0
 
+        for booking in bookings:
+            lot = ParkingLot.query.get(booking.lot_id)
+            spot = ParkingSpot.query.get(booking.spot_id)
+            total_amount += booking.bill_amount
+            booking_data.append({
+                "lot_location": lot.location if lot else "Unknown",
+                "spot_id": spot.id if spot else "Unknown",
+                "amount": booking.bill_amount,
+                "start_time": booking.start_time.strftime('%Y-%m-%d %H:%M'),
+                "end_time": booking.end_time.strftime('%Y-%m-%d %H:%M')
+            })
         return jsonify({
-            "email": user.email,
-            "name": user.name,
-            "total_bookings": total_bookings,
-            "total_spots_booked": total_spots_booked
+            "total_bookings": len(bookings),
+            "total_amount": total_amount,
+            "bookings": booking_data
         }), 200
     except Exception as e:
         return jsonify({"message": "Error fetching user summary", "error": str(e)}), 500
-
