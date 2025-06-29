@@ -22,11 +22,13 @@ A full-featured multi-user web application for managing 4-wheeler parking lots w
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Python
 - Redis server
 - Virtualenv (recommended)
 
-### Backend Setup
+### Cloning and installing requirements
+
 ```bash
 git clone https://github.com/yourusername/vehicle-parking-app.git
 cd backend
@@ -35,12 +37,15 @@ source foldername/bin/activate
 pip3 install -r requirements.txt
 ```
 
-First of all create three tabs of terminal
-then activate the virtual environment in all the terminal tabs
-then start these servers in each different terminal.
+### Backend Setup
 
-**for stop showing port is in already use in redis use command** :sudo systemctl stop redis
+- First of all create tabs in terminal
+- then activate the virtual environment in all the terminal tabs
+- then start these servers in each different terminal.
 
 1. **start redis server**: redis-sever
+-- **if port is already used then use this command** :sudo systemctl stop redis
 2. **start celery worker**: celery -A app.celery worker --loglevel INFO
 3. **start you application**: python app.py
+4. **MailHog**: MailHog
+5. **celery beat**: celery -A app.celery beat --loglevel INFO

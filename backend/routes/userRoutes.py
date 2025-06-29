@@ -14,11 +14,8 @@ def user_home():
         parkingLots = ParkingLot.query.all()
         lots = [{
             "id": lot.id,
-            "address": lot.address,
             "location": lot.location,
-            "pincode": lot.pincode,
             "price": lot.price,
-            "total_spots": lot.total_spots,
             "available_spots": lot.total_spots - ParkingSpot.query.filter_by(lot_id=lot.id, status='O').count()
         } for lot in parkingLots]
         
@@ -30,24 +27,23 @@ def user_home():
     except Exception as e:
         return jsonify({"message": "Problem fetching user info", "error": str(e)}), 500
 
-@app.route("/api/user/spot/book", methods=["POST"])
+@app.route("/api/user/book/spot/<int:lotId>", methods=["POST"])
 @auth_required('token')
 @roles_required('user')
-def book_parking_spot():
+def book_parking_spot(lotId):
     try:
         data = request.get_json()
-        lot_id = data.get("lot_id")
         vehicle_number = data.get("vehicle_number", "").upper().strip()
         start_time = datetime.now()
 
-        if not lot_id or not vehicle_number:
+        if not lotId or not vehicle_number:
             return jsonify({"message": "Lot ID and vehicle number are required"}), 400
 
         vehicle_number_patter = r'^[A-Z]{2}[ ]?[0-9]{2}[ ]?[A-Z]{1,2}[ ]?[0-9]{4}$'
         if not re.match(vehicle_number_patter, vehicle_number):
             return jsonify({"message": "Invalid vehicle number format"}), 400
 
-        available_spots = ParkingSpot.query.filter_by(lot_id=lot_id, status='A').all()
+        available_spots = ParkingSpot.query.filter_by(lot_id=lotId, status='A').all()
         if not available_spots:
             return jsonify({"message": "No available spots in the selected lot"}), 400
 
@@ -55,7 +51,7 @@ def book_parking_spot():
 
         booking = Bookings(
             user_id=current_user.id,
-            lot_id=lot_id,
+            lot_id=lotId,
             spot_id=selected_spot.id,
             vehicle_number=vehicle_number,
             start_time=start_time
@@ -70,7 +66,7 @@ def book_parking_spot():
             "message": "Parking spot booked successfully",
             "booking_id": booking.id,
             "spot_id": selected_spot.id,
-            "lot_id": lot_id,
+            "lot_id": lotId,
         }), 201
 
     except Exception as e:
@@ -103,14 +99,11 @@ def preview_release_spot(spot_id):
     except Exception as e:
         return jsonify({"message": "Error fetching preview", "error": str(e)}), 500
 
-@app.route("/api/user/spot/release", methods=["POST"])
+@app.route("/api/user/spot/release/<int:spot_id>", methods=["POST"])
 @auth_required('token')
 @roles_required('user')
-def release_parking_spot():
+def release_parking_spot(spot_id):
     try:
-        data = request.get_json()
-        spot_id = data.get("spot_id")
-
         if not spot_id:
             return jsonify({"message": "spot_id is required"}), 400
 
@@ -136,11 +129,6 @@ def release_parking_spot():
 
         return jsonify({
             "message": "Spot released successfully",
-            "spot_id": spot.id,
-            "vehicle_number": booking.vehicle_number,
-            "parking_time": booking.start_time.strftime("%Y-%m-%d %H:%M"),
-            "releasing_time": end_time.strftime("%Y-%m-%d %H:%M"),
-            "total_cost": cost
         }), 200
 
     except Exception as e:
@@ -158,6 +146,7 @@ def user_spot_history():
         for booking in bookings:
             history.append({
                 "booking_id": booking.id,
+                "spot_id": booking.spot_id,
                 "location": ParkingLot.query.get(booking.lot_id).location,
                 "vehicle_number": booking.vehicle_number,
                 "start_time": booking.start_time.strftime("%Y-%m-%d %H:%M"),
@@ -184,11 +173,12 @@ def user_summary():
             spot = ParkingSpot.query.get(booking.spot_id)
             total_amount += booking.bill_amount
             booking_data.append({
-                "lot_location": lot.location if lot else "Unknown",
-                "spot_id": spot.id if spot else "Unknown",
+                "lot_location": lot.location,
+                "spot_id": spot.id,
                 "amount": booking.bill_amount,
                 "start_time": booking.start_time.strftime('%Y-%m-%d %H:%M'),
-                "end_time": booking.end_time.strftime('%Y-%m-%d %H:%M')
+                "end_time" : booking.end_time.strftime('%Y-%m-%d %H:%M') if booking.end_time else "Still Parked",
+                "vehicle_number": booking.vehicle_number,
             })
         return jsonify({
             "total_bookings": len(bookings),

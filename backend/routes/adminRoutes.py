@@ -63,9 +63,12 @@ def update_parking_lot(lot_id):
         if not parking_lot:
             return jsonify({"message": "Parking lot not found"}), 404
 
-        spots_occupied = ParkingSpot.query.filter_by(lot_id=lot_id, status='O').count()
+        try:
+            new_total_spots = int(data.get("total_spots", parking_lot.total_spots))
+        except (ValueError, TypeError):
+            return jsonify({"message": "Invalid value for total_spots"}), 400
 
-        new_total_spots = data.get("total_spots", parking_lot.total_spots)
+        spots_occupied = ParkingSpot.query.filter_by(lot_id=lot_id, status='O').count()
 
         if new_total_spots < spots_occupied:
             return jsonify({
@@ -75,22 +78,25 @@ def update_parking_lot(lot_id):
 
         parking_lot.location = data.get("location", parking_lot.location)
         parking_lot.address = data.get("address", parking_lot.address)
-        parking_lot.pincode = data.get("pincode", parking_lot.pincode)
-        parking_lot.price = data.get("price", parking_lot.price)
+        parking_lot.pincode = str(data.get("pincode", parking_lot.pincode))
+        parking_lot.price = float(data.get("price", parking_lot.price))
 
-        if new_total_spots < parking_lot.total_spots:
-            remove_spots = parking_lot.total_spots - new_total_spots
-            spots_to_remove = ParkingSpot.query.filter_by(lot_id=lot_id, status='A').limit(remove_spots).all()
-            for spot in spots_to_remove:
-                db.session.delete(spot)
-        
-        if new_total_spots > parking_lot.total_spots:
-            additional_spots = new_total_spots - parking_lot.total_spots
-            for i in range(additional_spots):
-                spot = ParkingSpot(lot_id=lot_id, status='A')
-                db.session.add(spot)
+        if new_total_spots != parking_lot.total_spots:
+            if new_total_spots < parking_lot.total_spots:
+                remove_count = parking_lot.total_spots - new_total_spots
+                spots_to_remove = ParkingSpot.query.filter_by(lot_id=lot_id, status='A').limit(remove_count).all()
 
-        parking_lot.total_spots = new_total_spots
+                if len(spots_to_remove) < remove_count:
+                    return jsonify({"message": "Not enough available spots to remove"}), 400
+
+                for spot in spots_to_remove:
+                    db.session.delete(spot)
+
+            elif new_total_spots > parking_lot.total_spots:
+                for _ in range(new_total_spots - parking_lot.total_spots):
+                    db.session.add(ParkingSpot(lot_id=lot_id, status='A'))
+
+            parking_lot.total_spots = new_total_spots
 
         db.session.commit()
         return jsonify({"message": "Parking lot updated successfully"}), 200
@@ -137,12 +143,23 @@ def view_or_delete_parking_spot(spot_id):
             return jsonify({"message": "Parking spot not found"}), 404
 
         if request.method == "GET":
-            return jsonify({
-                "id": spot.id,
-                "lot_id": spot.lot_id,
-                "status": spot.status,
-            }), 200
-
+            if spot.status == 'O':
+                booking = Bookings.query.filter_by(spot_id=spot.id).first()
+                return jsonify({
+                    "id": spot.id,
+                    "lot_id": spot.lot_id,
+                    "status": spot.status,
+                    "userId" : booking.user_id,
+                    "vehicleNum": booking.vehicle_number,
+                    "startTime": booking.start_time,
+                }), 200
+            else:
+                return jsonify({
+                    "id": spot.id,
+                    "lot_id": spot.lot_id,
+                    "status": spot.status,
+                }), 200
+            
         elif request.method == "DELETE":
             if spot.status == 'O':
                 return jsonify({"message": "Can't delete an occupied spot"}), 400

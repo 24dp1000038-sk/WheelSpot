@@ -44,15 +44,16 @@ export default {
 
       <div v-if="bookings.length">
         <h5 class="mb-3">Booking Details</h5>
-        <table class="table table-bordered table-hover">
+        <table class="table table-bordered table-hover table-responsive">
           <thead class="table-light">
             <tr>
-              <th>#</th>
+              <th>SR No.</th>
               <th>Lot Location</th>
               <th>Spot ID</th>
               <th>Amount</th>
               <th>Start Time</th>
               <th>End Time</th>
+              <th>Bill Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -60,9 +61,10 @@ export default {
               <td>{{ i + 1 }}</td>
               <td>{{ b.lot_location }}</td>
               <td>{{ b.spot_id }}</td>
-              <td>₹ {{ b.amount }}</td>
+              <td>{{ b.vehicle_number }}</td>
               <td>{{ b.start_time }}</td>
               <td>{{ b.end_time }}</td>
+              <td>₹ {{ b.amount }}</td>
             </tr>
           </tbody>
         </table>
