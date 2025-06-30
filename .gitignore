@@ -9,3 +9,4 @@ file2.py
 test.html
 *.csv
 dump.rdb
+celerybeat-schedule
