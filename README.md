@@ -49,3 +49,6 @@ pip3 install -r requirements.txt
 3. **start you application**: python app.py
 4. **MailHog**: MailHog
 5. **celery beat**: celery -A app.celery beat --loglevel INFO
+
+--- to see the mails go to this url
+---- http://localhost:8025/

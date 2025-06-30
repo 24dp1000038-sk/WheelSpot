@@ -178,13 +178,7 @@ export default {
           throw new Error(data.message || "Registration failed");
         }
 
-        if (data.auth_token) {
-          localStorage.setItem("auth_token", data.auth_token);
-          localStorage.setItem("user_id", data.user_id);
-          localStorage.setItem("user_role", "user");
-        }
-
-        this.$router.push("/userHome");
+        this.$router.push("/login");
       } catch (error) {
         this.errorMessage =
           error.message || "Registration failed. Please try again.";

@@ -4,6 +4,8 @@ from ..extensions import db
 from ..models import ParkingLot, ParkingSpot, Bookings
 from datetime import datetime
 import random, re
+from ..tasks import booking_update_daily
+from celery.result import AsyncResult
 
 @app.route("/api/user/parking/lot/view", methods=['GET'])
 @auth_required('token')
@@ -170,11 +172,10 @@ def user_summary():
 
         for booking in bookings:
             lot = ParkingLot.query.get(booking.lot_id)
-            spot = ParkingSpot.query.get(booking.spot_id)
             total_amount += booking.bill_amount
             booking_data.append({
                 "lot_location": lot.location,
-                "spot_id": spot.id,
+                "spot_id": booking.spot_id,
                 "amount": booking.bill_amount,
                 "start_time": booking.start_time.strftime('%Y-%m-%d %H:%M'),
                 "end_time" : booking.end_time.strftime('%Y-%m-%d %H:%M') if booking.end_time else "Still Parked",

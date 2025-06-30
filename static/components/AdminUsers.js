@@ -23,7 +23,7 @@ export default {
     <div class="container mt-4">
       <div class="container-fluid p-0 m-0" v-if="users.length > 0">
       <h4 class="text-center border border-primary p-2 rounded">Registered Users</h4>
-      <table class="table table-bordered mt-4 text-center align-middle" >
+      <table class="table table-light table-striped-columns mt-4 text-center align-middle table-responsive" >
         <thead class="table-light">
           <tr>
             <th>ID</th>

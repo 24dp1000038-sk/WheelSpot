@@ -21,19 +21,70 @@ export default {
       </div>
     </nav>
 
-    <div class="container mt-4">
-      <h3 class="text-center">Admin Summary</h3>
-      <div class="row mt-4">
-        <div class="col-md-6">
-          <h5 class="text-center">Revenue per Lot</h5>
-          <canvas id="barChart"></canvas>
+    <div class="container my-4 my-md-5">
+      <div class="text-center mb-5">
+          <h1 class="display-5 fw-bold">Admin Summary</h1>
+      </div>
+      <div class="row g-4">
+        <!--- Revenue per lot details summary ---->
+        <div class="col-lg-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0 text-center">Revenue per Lot</h5>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th scope="col" class="ps-3">Lot ID</th>
+                      <th scope="col" class="text-end pe-3">Total Revenue (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item in lotRevenue" :key="item.lot_id">
+                        <td class="ps-3">{{ item.lot_id }}</td>
+                        <td class="text-end pe-3 fw-semibold">{{ item.total_amount }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="col-md-6">
-          <h5 class="text-center">Spot Usage</h5>
-          <canvas id="pieChart"></canvas>
+        <!--- Spot ugagess summary ---->
+        <div class="col-lg-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-header bg-dark text-white">
+              <h5 class="mb-0 text-center">Spot Usage</h5>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                        <th scope="col" class="ps-3">Lot ID</th>
+                        <th scope="col">Location</th>
+                        <th scope="col" class="text-center">Available</th>
+                        <th scope="col" class="text-center pe-3">Occupied</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item in lotUsage" :key="item.lot_id">
+                        <td class="ps-3">{{ item.lot_id }}</td>
+                        <td>{{ item.location }}</td>
+                        <td class="text-center text-success fw-bold">{{ item.available }}</td>
+                        <td class="text-center text-danger fw-bold pe-3">{{ item.occupied }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
   </div>
   `,
 
@@ -66,74 +117,9 @@ export default {
 
         this.lotRevenue = data.bill;
         this.lotUsage = data.lots;
-
-        this.renderBarChart();
-        this.renderPieChart();
       } catch (err) {
         console.error("Error loading summary:", err);
-      }
+      };
     },
-
-    renderBarChart() {
-      const ctx = document.getElementById("barChart");
-
-      const labels = this.lotUsage.map(item => `Lot ${item.lot_id}`);
-      const occupied = this.lotUsage.map(item => item.occupied);
-      const available = this.lotUsage.map(item => item.available);
-
-      new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: "Occupied",
-              data: occupied,
-              backgroundColor: "rgba(255, 99, 132, 0.7)"
-            },
-            {
-              label: "Available",
-              data: available,
-              backgroundColor: "rgba(75, 192, 192, 0.7)"
-          }
-          ]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: { beginAtZero: true }
-          }
-        }
-      });
-    },
-
-
-    renderPieChart() {
-      const ctx = document.getElementById("pieChart");
-
-      const labels = this.lotRevenue.map(item => `Lot ${item.lot_id}`);
-      const values = this.lotRevenue.map(item => item.total_amount);
-
-      new Chart(ctx, {
-        type: "doughnut",
-        data: {
-          labels: labels,
-          datasets: [{
-          label: "Revenue (₹)",
-          data: values,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.6)',
-            'rgba(54, 162, 235, 0.6)',
-            'rgba(255, 206, 86, 0.6)',
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(153, 102, 255, 0.6)'
-          ]
-          }]
-        },
-        options: {
-          responsive: true
-        }
-      });
-    },
-  }
+  },
 };

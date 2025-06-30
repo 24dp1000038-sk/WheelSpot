@@ -267,11 +267,10 @@ export default {
         const data = await response.json();
         if (response.ok) {
           this.releaseDetails = data;
-          console.log("Release Details:", this.releaseDetails);
           const modal = new bootstrap.Modal(document.getElementById('releaseModal'));
           modal.show();
         } else {
-          alert(data.message || "Could not fetch release details.");
+          this.message = data.message;
         }
       } catch (err) {
         console.error("Error fetching release preview", err);

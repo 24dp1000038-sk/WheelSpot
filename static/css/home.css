@@ -1,8 +1,6 @@
-
 .nav-sec {
   background: linear-gradient(135deg,#343a40 0%, #2d4459 100%);
 }
-
 .hero-section {
   background: linear-gradient(135deg, #0e1a31 0%, #89ace9 100%);
   padding: 100px 0 60px;
@@ -19,21 +17,6 @@
   height: 70px;
   background: rgba(49, 137, 145, 0.1);
 }
-.step-number {
-  width: 50px;
-  height: 50px;
-  background: #0d6efd;
-}
-.testimonial-author img {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-}
 .cta-section {
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-}
-.social-links a {
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.179);
 }

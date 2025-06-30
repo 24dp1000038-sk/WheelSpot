@@ -7,7 +7,6 @@ export default {
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#userNavbar">
           <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse ms-5" id="userNavbar">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item"><router-link class="nav-link" to="/userHome">Home</router-link></li>
@@ -21,7 +20,7 @@ export default {
     </nav>
 
     <div class="container mt-4">
-      <h4 class="mb-3 text-primary">User Summary</h4>
+      <h4 class="display-5 fw-bold">User Summary</h4>
 
       <div class="row mb-4">
         <div class="col-md-6">

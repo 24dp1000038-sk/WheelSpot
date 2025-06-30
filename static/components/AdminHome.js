@@ -28,13 +28,14 @@ export default {
       </div>
       </div>
 
-      <!-- Parking Lots Grid -->
       <div class="container mt-4">
+        <!-- Parking Lots head section name with all lot button-->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="text-primary">Parking Lots</h4>
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addLotModal">+ Add Lot</button>
         </div>
 
+        <!--- Parking lots details list --->
         <div class="row">
           <div class="col-md-4 mb-4" v-for="lot in lots" :key="lot.id">
             <div class="card h-100 shadow-sm">
