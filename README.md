@@ -1,5 +1,14 @@
 # 🚗 WheelSpot - Smart Parking Management System
 
+> **A modern, full-stack parking management application built with Flask, Vue.js, and Celery. Real-time parking spot booking, admin control, automated reports, and beautiful email notifications.**
+
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-3.1.0-green.svg)](https://flask.palletsprojects.com/)
+[![Vue.js](https://img.shields.io/badge/Vue.js-2.x-brightgreen.svg)](https://vuejs.org/)
+[![Celery](https://img.shields.io/badge/Celery-5.5.2-orange.svg)](https://celeryproject.org/)
+[![Redis](https://img.shields.io/badge/Redis-6.0.0-red.svg)](https://redis.io/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A modern, full-stack parking management application built with Flask, Vue.js, and Celery. WheelSpot provides real-time parking spot booking, management, and monitoring capabilities for both users and administrators.
 
 ## 🌟 Features
