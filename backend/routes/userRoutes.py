@@ -146,10 +146,12 @@ def user_spot_history():
 
         history = []
         for booking in bookings:
+            lot = ParkingLot.query.get(booking.lot_id)
+            spot = ParkingSpot.query.get(booking.spot_id)
             history.append({
                 "booking_id": booking.id,
-                "spot_id": booking.spot_id,
-                "location": ParkingLot.query.get(booking.lot_id).location,
+                "spot_id": spot.id if spot else 0,
+                "location": lot.location if lot else "Unknown",
                 "vehicle_number": booking.vehicle_number,
                 "start_time": booking.start_time.strftime("%Y-%m-%d %H:%M"),
                 "end_time": booking.end_time.strftime("%Y-%m-%d %H:%M") if booking.end_time else None,
@@ -172,10 +174,11 @@ def user_summary():
 
         for booking in bookings:
             lot = ParkingLot.query.get(booking.lot_id)
+            spot = ParkingSpot.query.get(booking.spot_id)
             total_amount += booking.bill_amount
             booking_data.append({
-                "lot_location": lot.location,
-                "spot_id": booking.spot_id,
+                "lot_location": lot.location if lot else "Unknown",
+                "spot_id": spot.id if spot else 0,
                 "amount": booking.bill_amount,
                 "start_time": booking.start_time.strftime('%Y-%m-%d %H:%M'),
                 "end_time" : booking.end_time.strftime('%Y-%m-%d %H:%M') if booking.end_time else "Still Parked",

@@ -1,10 +1,9 @@
 from celery import shared_task
-from .models import User, Bookings, ParkingLot
+from .models import User, Bookings, ParkingLot, ParkingSpot
 from .utils import format_report
 from .mail import send_email
-import datetime, csv
-import json
-import requests
+import datetime, csv, json, requests
+
 
 @shared_task(ignore_results=False, name="download_csv_report")
 def csv_report(user_id):
@@ -46,9 +45,10 @@ def monthly_report():
 
         for b in bookings:
             lot = ParkingLot.query.get(b.lot_id)
+            spot = ParkingSpot.query.get(b.spot_id)
             booking = {
                 'location': lot.location if lot else "Unknown",
-                'spot_id': b.spot_id,
+                'spot_id': spot.id if spot else 0,
                 'vehicle_number': b.vehicle_number,
                 'start_time': b.start_time.strftime('%Y-%m-%d %H:%M'),
                 'end_time': b.end_time.strftime('%Y-%m-%d %H:%M') if b.end_time else 'Active',
@@ -66,7 +66,11 @@ def monthly_report():
 
 @shared_task(ignore_results = False, name = "booking_update_daily")
 def booking_update_daily():
-    text = f"Hello everyone, Check out new Parking Lots. Please check the app at http://127.0.0.1:5000"
-    response = requests.post("https://chat.googleapis.com/v1/spaces/AAQAUkWqlaE/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=rf2dx-7ImweS8u-7TfU1ayBxp_r1x0nWFM68BmToX30", json = {"text": text})
-    print(response.status_code)
+    users = User.query.all()
+    for user in users:
+        if user.id == 1:
+            continue
+        text = f"Hello {user.name}, Check out new Parking Lots. Please check the app at http://127.0.0.1:5000"
+        response = requests.post("https://chat.googleapis.com/v1/spaces/AAQAUkWqlaE/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=rf2dx-7ImweS8u-7TfU1ayBxp_r1x0nWFM68BmToX30", json = {"text": text})
+        print(response.status_code)
     return "Parking update sent to users"

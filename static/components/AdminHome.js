@@ -1,29 +1,52 @@
 export default {
   template: `
     <div class="container-fluid p-0 m-0">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-          <div class="container-fluid">
-              <p class="navbar-brand p-0 m-0 text-warning">Welcome Admin</p>
-              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
-              <span class="navbar-toggler-icon"></span>
-              </button>
-              <div class="collapse navbar-collapse ms-5" id="adminNavbar">
-              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                  <li class="nav-item"><router-link class="nav-link" to="/adminHome">Home</router-link></li>
-                  <li class="nav-item"><router-link class="nav-link" to="/adminUsers">Users</router-link></li>
-                  <li class="nav-item"><router-link class="nav-link" to="/adminSearch">Search</router-link></li>
-                  <li class="nav-item"><router-link class="nav-link" to="/adminSummary">Summary</router-link></li>
-              </ul>
-              <ul class="navbar-nav ms-auto me-5">
-                  <li class="nav-item"><a class="nav-link text-danger" href="#" @click="logout">Logout</a></li>
-              </ul>
-              </div>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid px-4">
+          <router-link class="navbar-brand text-warning fw-semibold ms-3" to="/adminHome">
+            Admin Panel
+          </router-link>
+
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="collapse navbar-collapse ms-3" id="adminNavbar">
+            <!-- Left side nav links -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <router-link class="nav-link" to="/adminHome">Home</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/adminUsers">Users</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/adminSearch">Search</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/adminSummary">Summary</router-link>
+              </li>
+            </ul>
+
+            <!-- Right side logout -->
+            <ul class="navbar-nav ms-auto me-5">
+              <li class="nav-item">
+                <button class="nav-link btn btn-danger" @click="logout">Logout</button>
+              </li>
+            </ul>
           </div>
+        </div>
       </nav>
 
-      <div class="container mt-4" v-if="message">
+      <div class="container mt-4" v-if="emessage">
       <div class="alert alert-danger d-flex justify-content-between" role="alert">
-          {{ message }}
+          {{ emessage }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      </div>
+      <div class="container mt-4" v-if="smessage">
+      <div class="alert alert-success d-flex justify-content-between" role="alert">
+          {{ smessage }}
           <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
       </div>
@@ -210,7 +233,8 @@ export default {
         price: 0,
         total_spots: 0,
       },
-      message: '',
+      emessage: '',
+      smessage: '',
     };
   },
   mounted() {
@@ -251,8 +275,9 @@ export default {
         await this.fetchLots();
         const modal = bootstrap.Modal.getInstance(document.getElementById('addLotModal'));
         modal.hide();
+        this.smessage = "Lot created successfully.";
         if (!response.ok) {
-          throw new Error("Failed to create lot");
+          this.emessage = "Failed to create lot.";
         };
       } catch (err) {
         console.error("Error creating lot", err);
@@ -289,22 +314,16 @@ export default {
         });
 
         const result = await response.json();
+        this.smessage = result.message || "Lot updated successfully.";
 
         if (!response.ok) {
-          alert(result.message || "Failed to update lot.");
+          this.emessage = result.message || "Failed to update lot.";
           return;
         }
 
         await this.fetchLots();
-        const modalElement = document.getElementById('updateLot');
-        const modalInstance = bootstrap.Modal.getInstance(modalElement);
-        modalInstance.hide();
-
-      setTimeout(() => {
-        document.body.classList.remove('modal-open');
-        const backdrops = document.querySelectorAll('.modal-backdrop');
-        backdrops.forEach(b => b.remove());
-      }, 300);
+        const modal = bootstrap.Modal.getInstance(document.getElementById('updateLot'));
+        modal.hide();
       } catch (err) {
         console.error("Error updating lot", err);
       }
@@ -320,10 +339,11 @@ export default {
         });
         if (!response.ok) {
           const result = await response.json();
-          this.message = result.message || "Failed to delete lot.";
+          this.emessage = result.message || "Failed to delete lot.";
           return;
         }
         this.fetchLots();
+        this.smessage = "Lot deleted successfully.";
       } catch (err) {
         console.error("Error deleting lot", err);
       }
@@ -362,12 +382,13 @@ export default {
         });
         if (!response.ok) {
           const result = await response.json();
-          this.message = result.message || "Failed to delete spot.";
+          this.emessage = result.message || "Failed to delete spot.";
           return;
         }
         this.fetchLots();
         const modal = bootstrap.Modal.getInstance(document.getElementById('spotModal'));
         modal.hide();
+        this.smessage = "Spot deleted successfully.";
       }catch (err){
         console.log("Error deleting spot", err)
       }

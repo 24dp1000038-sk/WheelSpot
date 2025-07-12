@@ -23,8 +23,8 @@ export default {
             <div class="card border-primary shadow-lg p-3 p-md-4 bg-white rounded">
               <form @submit.prevent="loginUser">
                 <h3 class="text-center mb-4">Login</h3>
-                <div v-if="errorMessage" class="alert alert-danger">
-                  {{ errorMessage }}
+                <div v-if="emessage" class="alert alert-danger">
+                  {{ emessage }}
                 </div>
                 <div class="mb-3">
                   <label for="email" class="form-label">Email (Username)</label>
@@ -75,8 +75,8 @@ export default {
       email: "",
       password: ""
     },
-    message: "",
     showPassword: false,
+    emessage: "",
   }
 },
 methods:{
@@ -117,7 +117,7 @@ methods:{
 
     } catch (error) {
       console.error("Login error:", error);
-      this.message = error.message;
+      this.emessage = error.message;
     }
   },
   togglePass() {

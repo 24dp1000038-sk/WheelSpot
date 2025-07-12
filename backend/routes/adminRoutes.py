@@ -201,57 +201,90 @@ def get_all_users():
         return jsonify(users_list), 200
     except Exception as e:
         return jsonify({"message": "Error fetching users", "error": str(e)}), 500
+    
+# --- deleting a user ----
+@app.route("/api/admin/user/delete/<int:user_id>", methods=["DELETE"])
+@auth_required('token')
+@roles_required('admin')
+def delete_user(user_id):
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        if user.id == 1: 
+            return jsonify({"message": "Cannot delete the super admin user"}), 403
+
+        active_booking = Bookings.query.filter_by(user_id=user.id, end_time=None).first()
+        if active_booking:
+            return jsonify({
+                "message": "Cannot delete user with active (ongoing) parking."
+            }), 400
+        
+        past_bookings = Bookings.query.filter_by(user_id=user.id).all()
+        for b in past_bookings:
+            db.session.delete(b)
+
+        db.session.delete(user)
+        db.session.commit()
+        
+        return jsonify({"message": "User deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "message": "Error deleting user", 
+            "error": str(e)
+        }), 500
+
 
 @app.route("/api/admin/search", methods=["GET"])
 @auth_required('token')
 @roles_required('admin')
 def admin_search():
-    search_type = request.args.get("type") 
+    search_type = request.args.get("type")
     search_query = request.args.get("query")
 
+    if not search_type or not search_query:
+        return jsonify({"message": "Search type and query required"}), 400
+
+    results = []
+
     try:
-        results = []
-
-        if not search_type or not search_query:
-            return jsonify({"message": "Search type and query required"}), 400
-
         if search_type == "user":
             user = User.query.filter_by(id=int(search_query)).first()
             if user:
-                results = [{
+                results.append({
                     "type": "user",
                     "id": user.id,
                     "name": user.name,
                     "email": user.email,
-                    "pincode": user.pincode 
-                }]
+                    "pincode": user.pincode
+                })
 
         elif search_type == "location":
             lots = ParkingLot.query.filter(ParkingLot.address.ilike(f"%{search_query}%")).all()
             for lot in lots:
                 spots = ParkingSpot.query.filter_by(lot_id=lot.id).all()
-                occupied_count = sum(1 for s in spots if s.status == 'O')
-                capacity_count = len(spots) 
-
+                occupied = sum(1 for s in spots if s.status == 'O')
                 results.append({
-                    "type": "lot",     
+                    "type": "lot",
                     "lot_id": lot.id,
                     "address": lot.address,
-                    "occupied": occupied_count,
-                    "capacity": capacity_count,
+                    "occupied": occupied,
+                    "capacity": len(spots),
                     "spots": [{"id": s.id, "is_occupied": s.status == 'O'} for s in spots]
                 })
 
         elif search_type == "spot":
             spot = ParkingSpot.query.get(int(search_query))
             if spot:
-                results = [{
-                    "type": "spot",          
-                    "id": spot.id,      
+                results.append({
+                    "type": "spot",
+                    "id": spot.id,
                     "lot_id": spot.lot_id,
                     "is_occupied": spot.status == 'O'
-                }]
-
+                })
         else:
             return jsonify({"message": "Invalid search type"}), 400
 
@@ -260,8 +293,9 @@ def admin_search():
     except ValueError:
         return jsonify({"message": "Invalid ID format. Please provide a number."}), 400
     except Exception as e:
-        app.logger.error(f"Error during admin search: {e}") 
-        return jsonify({"message": "An error occurred while processing your request.", "error": str(e)}), 500
+        app.logger.error(f"Search error: {e}")
+        return jsonify({"message": "Server error", "error": str(e)}), 500
+
 
 #  ---- admin summary ------
 @app.route("/api/admin/summary", methods=["GET"])
@@ -290,10 +324,37 @@ def admin_summary():
                 "available" : available_spots,
                 "occupied" : occupied_spots
             })
+        
+        booking_history = []
+        users = User.query.all()
+        for user in users:
+            if user.id == 1:
+                continue
+            bookings = Bookings.query.filter_by(user_id=user.id).all()
+            b = []
+            for i in bookings:
+                lot = ParkingLot.query.get(i.lot_id)
+                spot = ParkingSpot.query.get(i.spot_id)
+                b.append({
+                    'location': lot.location if lot else "Unknown",
+                    'spot_id': spot.id if spot else 0,
+                    'vehicle_number': i.vehicle_number,
+                    'start_time': i.start_time.strftime('%Y-%m-%d %H:%M'),
+                    'end_time': i.end_time.strftime('%Y-%m-%d %H:%M') if i.end_time else 'Active',
+                    'bill_amount': i.bill_amount
+                })
+            user_data = {
+                'name': user.name,
+                'email': user.email,
+                'total_spent': sum(bill.bill_amount for bill in bookings),
+                'bookings':b,
+            }
+            booking_history.append(user_data)
 
         return jsonify({
             "bill": total_bill_each_lot,
-            "lots": parking_lots
+            "lots": parking_lots,
+            "booking_history": booking_history,
         }), 200
     except Exception as e:
         return jsonify({"message": "Error fetching summary", "error": str(e)}), 500
