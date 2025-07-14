@@ -7,7 +7,6 @@
 [![Vue.js](https://img.shields.io/badge/Vue.js-2.x-brightgreen.svg)](https://vuejs.org/)
 [![Celery](https://img.shields.io/badge/Celery-5.5.2-orange.svg)](https://celeryproject.org/)
 [![Redis](https://img.shields.io/badge/Redis-6.0.0-red.svg)](https://redis.io/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A modern, full-stack parking management application built with Flask, Vue.js, and Celery. WheelSpot provides real-time parking spot booking, management, and monitoring capabilities for both users and administrators.
 
@@ -77,8 +76,13 @@ cd WheelSpot
 ```
 
 ### 2. Install Dependencies
+in linux or mac or wsl
 ```bash
-pip install -r requirements.txt
+pip3 install -r requirements.txt
+```
+If it is not working use this
+```bash
+python3 -m pip install -r requirements.txt --break-system-packages
 ```
 
 ### 3. Start Redis Server
@@ -99,12 +103,6 @@ The database will be automatically created when you run the application for the 
 
 ### 5. Run the Application
 
-#### Option A: Run Flask App Only
-```bash
-python app.py
-```
-
-#### Option B: Run with Celery Worker (Recommended)
 ```bash
 # Terminal 1: Start Celery Worker
 celery -A app.celery worker --loglevel=info
@@ -114,6 +112,9 @@ celery -A app.celery beat --loglevel=info
 
 # Terminal 3: Start Flask App
 python app.py
+
+# Termial 4: Start Mailhog server
+MailHog
 ```
 
 ### 6. Access the Application
@@ -169,7 +170,6 @@ WheelSpot/
 
 ### Default Credentials
 - **Admin**: `admin@gmail.com` / `hello@123`
-- **Sample User**: `sam@gmail.com` / `hello@123`
 
 ## 🚗 Vehicle Number Format
 
@@ -272,9 +272,6 @@ The application uses a local development configuration by default. For productio
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🆘 Support
 
